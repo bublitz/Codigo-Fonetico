@@ -13,7 +13,7 @@ library codfon;
 uses
   SysUtils,
   Classes,
-  untMain in 'untMain.pas';
+  untCodFon in 'untCodFon.pas';
 
 {$R *.res}
 

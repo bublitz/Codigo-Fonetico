@@ -1,4 +1,4 @@
-unit untMain;
+unit untCodFon;
 
 interface
 
@@ -8,6 +8,47 @@ uses
 function CodiFonPT_BR(nome: PChar): PChar; cdecl; export;
 
 implementation
+
+function RemoverAcentos(const AStr: string): string;
+const
+  AcentosOrigin = '¡¬√¿ƒ≈… »ÀÕŒÃœ”‘’“÷⁄€Ÿ‹«—›ü';
+  AcentosSubsti = 'AAAAAAEEEEIIIIOOOOOOUUUCNYY';
+var
+  i: Integer;
+begin
+  Result := AStr;
+  for i := 1 to Length(AcentosOrigin) do
+    Result := StringReplace(Result, AcentosOrigin[i], AcentosSubsti[i], [rfReplaceAll, rfIgnoreCase]);
+end;
+
+function RemoverConjuncoes(const AStr: string): string;
+const
+  Conjuncoes = ['DA', 'DAS', 'DE', 'DI', 'DO', 'DOS', 'E'];
+var
+  i: Integer;
+  Palavras: TArray<string>;
+begin
+  Result := AStr;
+  Palavras := Result.Split([' ']);
+  for i := 0 to Length(Palavras) - 1 do
+    if Palavras[i] <> '' then
+      if Palavras[i].ToUpper = 'DA' then
+        Palavras[i] := ''
+      else if Palavras[i].ToUpper = 'DAS' then
+        Palavras[i] := ''
+      else if Palavras[i].ToUpper = 'DE' then
+        Palavras[i] := ''
+      else if Palavras[i].ToUpper = 'DI' then
+        Palavras[i] := ''
+      else if Palavras[i].ToUpper = 'DO' then
+        Palavras[i] := ''
+      else if Palavras[i].ToUpper = 'DOS' then
+        Palavras[i] := ''
+      else if Palavras[i].ToUpper = 'E' then
+        Palavras[i] := '';
+
+  Result := string.Join(' ', Palavras);
+end;
 
 function CodiFonPT_BR(nome: PChar): PChar;
 var
@@ -72,9 +113,8 @@ begin
 
     {
       As alteraÁıes nas regras abaixo s„o sugestıes do
-      VinÌcius de Lucena Bonoto,
-      monografia
-      Bacharel em CiÍncia da ComputaÁ„o
+      VinÌcius de Lucena Bonoto, na sua monografia de conclus„o do curso de
+      Bacharel em CiÍncia da ComputaÁ„o na
       FAGOC - Faculdade Governador Ozanam Coelho
       Ub·/MG - 2011
     }
