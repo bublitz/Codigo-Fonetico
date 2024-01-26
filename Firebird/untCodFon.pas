@@ -23,7 +23,7 @@ end;
 
 function RemoverConjuncoes(const AStr: string): string;
 const
-  Conjuncoes = ['DA', 'DAS', 'DE', 'DI', 'DO', 'DOS', 'E'];
+  Conjuncoes: array of String = ['DA', 'DAS', 'DE', 'DI', 'DO', 'DOS', 'E'];
 var
   i: Integer;
   Palavras: TArray<string>;
@@ -169,7 +169,8 @@ begin
              novo := novo + 'Q';
 
         'S':
-           case aux[i+1] of
+          if i<Length(aux) then
+            case aux[i+1] of
              'H': // SH = X
                novo := novo + 'X';
 
@@ -178,13 +179,13 @@ begin
                  novo := novo + 'Z' // S entre duas vogais = Z
                else
                  novo := novo + 'S';
+            end
+          else
+           if aux[i-1] = 'C' then
+            novo := novo + 'KS'
            else
-             if aux[i-1] = 'C' then
-              novo := novo + 'KS'
-             else
-               if (i = Length(aux)) or (aux[i+1] = ' ') then
-                 novo := novo + 'S';
-           end;
+             if (i = Length(aux)) or (aux[i+1] = ' ') then
+               novo := novo + 'S';
 
         'U':
            if CharInSet(aux[i - 1], ['A','E','I','O','U']) then
@@ -210,7 +211,7 @@ begin
 
     CodiFonPT_BR := PChar(novo);
   except
-    CodiFonPT_BR := PChar('');
+    CodiFonPT_BR := PChar(novo);
   end;
 end;
 
