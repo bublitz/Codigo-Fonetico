@@ -59,57 +59,9 @@ begin
   try
     // Adicione SysUtils em uses
     aux := AnsiUpperCase(nome);
-
-    // Tira acentos
-    aux := StringReplace(aux, 'Á', 'A', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Â', 'A', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Ã', 'A', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'À', 'A', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Ä', 'A', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Å', 'A', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'É', 'E', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Ê', 'E', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'È', 'E', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Ë', 'E', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Í', 'I', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Î', 'I', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Ì', 'I', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Ï', 'I', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Ó', 'O', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Ô', 'O', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Õ', 'O', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Ò', 'O', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Ö', 'O', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Ú', 'U', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Û', 'U', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Ù', 'U', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Ü', 'U', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Ç', 'S', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Ñ', 'N', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Ý', 'Y', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Ÿ', 'Y', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, 'Y', 'Y', [rfReplaceAll, rfIgnoreCase]);
-
-    for i := 1 to Length(aux) do
-      if Ord(aux[i]) > 127 then
-        aux[i] := #32;
-
-    // Retira E , DA, DE e DO do nome
-    // José da Silva = José Silva
-    // João Costa e Silva = João Costa Silva
-    aux := StringReplace(aux, ' DA ', '', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, ' DAS ', '', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, ' DE ', '', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, ' DI ', '', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, ' DO ', '', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, ' DOS ', '', [rfReplaceAll, rfIgnoreCase]);
-    aux := StringReplace(aux, ' E ', '', [rfReplaceAll, rfIgnoreCase]);
-
-    // Retira letras duplicadas
-    // Elizabette = Elizabete
-    for i := 1 to Length(aux)-1 do
-      if aux[i] = aux[i+1] then
-        Delete(aux, i, 1);
+    aux := RemoverAcentos(aux);
+    aux := RemoverConjuncoes(aux);
+    aux := RemoverDuplicatas(aux);
 
     {
       As alterações nas regras abaixo são sugestões do
@@ -120,98 +72,74 @@ begin
     }
 
     novo := '';
-    for i := 1 to Length(aux) do
+    i := 1;
+    while i <= Length(aux) do
     begin
       case aux[i] of
-        // 'A','E','I','O','U','Y','H' e espaços: ignora
-
         'B','D','F','J','K','L','M','R','T','V':
           novo := novo + aux[i];
-
-        'C':  // CH = X
-          if aux[i+1] = 'H' then
-            novo := novo + 'X'
-          else // Carol = Karol
-          if CharInSet(aux[i+1], ['A','O','U']) then
+        'C':
+          if (i < Length(aux)) and (aux[i+1] = 'H') then
+          begin
+            novo := novo + 'X';
+            Inc(i);
+          end
+          else if (i < Length(aux)) and (aux[i+1] in ['A','O','U','R','L']) then
             novo := novo + 'K'
-          else
-          if aux[i-1] = 'X' then
-            novo := novo + 'S'
-          else // Celina = Selina
-          if CharInSet(aux[i+1], ['E','I']) then
-            novo := novo + 'S'
-          else
-          if CharInSet(aux[i+1], ['R','L']) then
-            novo := novo + 'K';
-
-        'G': // Jeferson = Geferson
-          if CharInSet(aux[i+1], ['E','I']) then
+          else if (i < Length(aux)) and (aux[i+1] in ['E','I']) then
+            novo := novo + 'S';
+        'G':
+          if (i < Length(aux)) and (aux[i+1] in ['E','I']) then
             novo := novo + 'J'
           else
             novo := novo + 'G';
-
-        'N': // Nilton e Niltom
+        'N':
           if (i = Length(aux)) or (aux[i+1] = ' ') then
             novo := novo + 'M'
           else
             novo := novo + 'N';
-
-        'P': // Phelipe = Felipe
-           if aux[i+1] = 'H' then
-             novo := novo + 'F'
-           else
-             novo := novo + 'P';
-
-        'Q': // Keila = Queila
-           if aux[i+1] = 'U' then
-             novo := novo + 'K'
-           else
-             novo := novo + 'Q';
-
-        'S':
-          if i<Length(aux) then
-            case aux[i+1] of
-             'H': // SH = X
-               novo := novo + 'X';
-
-             'A','E','I','O','U':
-               if CharInSet(aux[i-1], ['A','E','I','O','U']) then
-                 novo := novo + 'Z' // S entre duas vogais = Z
-               else
-                 novo := novo + 'S';
-            end
+        'P':
+          if (i < Length(aux)) and (aux[i+1] = 'H') then
+          begin
+            novo := novo + 'F';
+            Inc(i);
+          end
           else
-           if aux[i-1] = 'C' then
-            novo := novo + 'KS'
-           else
-             if (i = Length(aux)) or (aux[i+1] = ' ') then
-               novo := novo + 'S';
-
-        'U':
-           if CharInSet(aux[i - 1], ['A','E','I','O','U']) then
-             novo := novo + 'L';
-
-        'W': // Walter = Valter
-           novo := novo + 'V';
-
-        'X': // Walter = Valter
+            novo := novo + 'P';
+        'Q':
+          if (i < Length(aux)) and (aux[i+1] = 'U') then
+          begin
+            novo := novo + 'K';
+            Inc(i);
+          end
+          else
+            novo := novo + 'Q';
+        'S':
+          if (i < Length(aux)) and (aux[i+1] = 'H') then
+          begin
+            novo := novo + 'X';
+            Inc(i);
+          end
+          else if (i > 1) and (i < Length(aux)) and (aux[i-1] in ['A','E','I','O','U']) and (aux[i+1] in ['A','E','I','O','U']) then
+            novo := novo + 'Z'
+          else
+            novo := novo + 'S';
+        'W':
+          novo := novo + 'V';
+        'X':
+          novo := novo + 'X';
+        'Z':
           if (i = Length(aux)) or (aux[i+1] = ' ') then
-             novo := novo + 'KS'
-           else
-             novo := novo + 'X';
-
-        'Z': // no final do nome tem som de S -> Luiz = Luis
-           if (i = Length(aux)) or (aux[i+1] = ' ') then
-             novo := novo + 'S'
-           else
-             if (i = Length(aux)) or (aux[i+1] = ' ') then
-               novo := novo + 'S' ;
+            novo := novo + 'S'
+          else
+            novo := novo + 'Z';
       end;
+      Inc(i);
     end;
 
-    CodiFonPT_BR := PChar(novo);
+    Result := PChar(novo);
   except
-    CodiFonPT_BR := PChar(novo);
+    Result := PChar('');
   end;
 end;
 
